@@ -1,0 +1,2 @@
+https://ch405-labs.com/ch32v003_intro/
+https://llvm.org/docs/RISCVUsage.html
