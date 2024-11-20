@@ -27,4 +27,5 @@ riscv-llvm-toolchain
 tools
 .pio
 
+build
 
