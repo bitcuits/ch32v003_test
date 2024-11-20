@@ -6,7 +6,7 @@ export REPOROOT ::= $(dir $(mkfile_path))
 TOOLS?=/home/carsten/.platformio/packages/toolchain-riscv/bin
 
 CROSSCC?=$(TOOLS)/riscv-none-embed-gcc
-AR?=$(TOOLS)/riscv-none-embed-gcc-ar
+CROSSAR?=$(TOOLS)/riscv-none-embed-gcc-ar
 RANLIB?=$(TOOLS)/riscv-none-embed-gcc-ranlib
 
 BUILD?=build
@@ -99,7 +99,8 @@ $(BUILD)/%.o: %.c
 
 
 $(LIBFILE): $(LIBOBJ)
-	$(AR) rc $@ $<
+	$(CROSSAR) rc $@ $<
+	$(RANLIB) $@
 
 env:
 	@echo $(LIBOBJ)
