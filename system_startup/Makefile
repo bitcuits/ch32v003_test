@@ -82,11 +82,11 @@ MODULES+=-DCH32V00x
 MODULES+=-DCH32V003 
 
 INC+=src/include 
-INC+=/home/carsten/.platformio/packages/framework-wch-noneos-sdk/Core/ch32v00x 
-INC+=/home/carsten/.platformio/packages/framework-wch-noneos-sdk/Peripheral/ch32v00x/inc 
-INC+=/home/carsten/.platformio/packages/framework-wch-noneos-sdk/Peripheral/ch32v00x/src 
-INC+=/home/carsten/.platformio/packages/framework-wch-noneos-sdk/Startup 
-INC+=/home/carsten/.platformio/packages/framework-wch-noneos-sdk/System/ch32v00x
+INC+=framework-wch-noneos-sdk/Core/ch32v00x 
+INC+=framework-wch-noneos-sdk/Peripheral/ch32v00x/inc 
+INC+=framework-wch-noneos-sdk/Peripheral/ch32v00x/src 
+INC+=framework-wch-noneos-sdk/Startup 
+INC+=framework-wch-noneos-sdk/System/ch32v00x
 
 #riscv-none-embed-gcc -o .pio/build/ch32v003f4p6_evt_r0/firmware.elf -T /home/carsten/work/ch32v003_test/system_startup/.pio/build/ch32v003f4p6_evt_r0/Link.ld -Os -march=rv32ecxw -mabi=ilp32e -ffunction-sections -fdata-sections -Wl,-gc-sections --specs=nano.specs --specs=nosys.specs -nostartfiles -Wl,-Map="/home/carsten/work/ch32v003_test/system_startup/.pio/build/ch32v003f4p6_evt_r0/system_startup.map" .pio/build/ch32v003f4p6_evt_r0/FrameworkNoneOSCore/core_riscv.o .pio/build/ch32v003f4p6_evt_r0/FrameworkNoneOSStartup/startup_ch32v00x.o .pio/build/ch32v003f4p6_evt_r0/FrameworkNoneOSSSystem/system_ch32v00x.o .pio/build/ch32v003f4p6_evt_r0/src/debug.o .pio/build/ch32v003f4p6_evt_r0/src/main.o -L.pio/build/ch32v003f4p6_evt_r0 -Wl,--start-group -lm .pio/build/ch32v003f4p6_evt_r0/libFrameworkNoneOSVariant.a -Wl,--end-group
 
@@ -109,9 +109,12 @@ lib: $(LIBFILE)
 	@mkdir -p $*
 	touch $@
 
-objs: $(OBJ)
+objs: ways
+objs: $(OBJ) $(LIBOBJ)
 
 ways: $(addsuffix .way,$(WAYS))
+
+test33: $(BUILD)/Core/ch32v00x/core_riscv.o
 
 link: ways
 link: $(OBJ) $(LIBFILE)
