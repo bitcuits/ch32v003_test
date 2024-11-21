@@ -11,13 +11,20 @@ RANLIB?=$(TOOLS)/riscv-none-embed-gcc-ranlib
 
 BUILD?=build
 
+FIRMWARE:=$(BUILD)/firmware.elf
+LINKFILE:=.pio/build/ch32v003f4p6_evt_r0/Link.ld 
+#FIRMWARE:=/home/carsten/work/ch32v003_test/system_startup/.pio/build/ch32v003f4p6_evt_r0/Link.ld
 
 #riscv-none-embed-gcc -o .pio/build/ch32v003f4p6_evt_r0/FrameworkNoneOSCore/core_riscv.o -c -std=gnu99 -Os -g -Wall -msmall-data-limit=0 -msave-restore -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -fno-common -Wunused -Wuninitialized -Wno-comment -march=rv32ecxw -mabi=ilp32e -DPLATFORMIO=60116 -DCH32V003F4 -DCH32V00X -DCH32V00x -DCH32V003 -Isrc/include -I/home/carsten/.platformio/packages/framework-wch-noneos-sdk/Core/ch32v00x -I/home/carsten/.platformio/packages/framework-wch-noneos-sdk/Peripheral/ch32v00x/inc -I/home/carsten/.platformio/packages/framework-wch-noneos-sdk/Peripheral/ch32v00x/src -I/home/carsten/.platformio/packages/framework-wch-noneos-sdk/Startup -I/home/carsten/.platformio/packages/framework-wch-noneos-sdk/System/ch32v00x /home/carsten/.platformio/packages/framework-wch-noneos-sdk/Core/ch32v00x/core_riscv.c
-
 CFILES+=src/debug.c
 CFILES+=src/main.c
+INC+=src/include
+OBJ:=$(CFILES:.c=.o)
+OBJ:=$(notdir $(OBJ))
+OBJ:=$(addprefix $(BUILD)/,$(OBJ)) 
 
-LIBROOT?=/home/carsten/.platformio/packages/framework-wch-noneos-sdk/
+
+LIBROOT?=framework-wch-noneos-sdk/
 #System/ch32v00x/system_ch32v00x.c
 
 LIBSRC+=System/ch32v00x/system_ch32v00x.c
@@ -37,13 +44,15 @@ LIBSRC+=Peripheral/ch32v00x/src/ch32v00x_spi.c
 LIBSRC+=Peripheral/ch32v00x/src/ch32v00x_tim.c
 LIBSRC+=Peripheral/ch32v00x/src/ch32v00x_usart.c
 LIBSRC+=Peripheral/ch32v00x/src/ch32v00x_wwdg.c
+LIBSRC+=Core/ch32v00x/core_riscv.c
+#LIBSRC+=Startup/startup_ch32v00x.S
 
 
 LIBOBJ:=$(LIBSRC:.c=.o)
 LIBOBJ:=$(addprefix $(BUILD)/,$(LIBOBJ))
 #LIBSRC:=$(addprefix $(LIBROOT)/,$(LIBSRC))
 
-LIBFILE:=$(BUILD)/libc32v00x.a
+LIBFILE:=$(BUILD)/libch32v00x.a
 
 CFLAGS+=-std=gnu99 
 CFLAGS+=-Os 
@@ -78,6 +87,17 @@ INC+=/home/carsten/.platformio/packages/framework-wch-noneos-sdk/Peripheral/ch32
 INC+=/home/carsten/.platformio/packages/framework-wch-noneos-sdk/Startup 
 INC+=/home/carsten/.platformio/packages/framework-wch-noneos-sdk/System/ch32v00x
 
+#riscv-none-embed-gcc -o .pio/build/ch32v003f4p6_evt_r0/firmware.elf -T /home/carsten/work/ch32v003_test/system_startup/.pio/build/ch32v003f4p6_evt_r0/Link.ld -Os -march=rv32ecxw -mabi=ilp32e -ffunction-sections -fdata-sections -Wl,-gc-sections --specs=nano.specs --specs=nosys.specs -nostartfiles -Wl,-Map="/home/carsten/work/ch32v003_test/system_startup/.pio/build/ch32v003f4p6_evt_r0/system_startup.map" .pio/build/ch32v003f4p6_evt_r0/FrameworkNoneOSCore/core_riscv.o .pio/build/ch32v003f4p6_evt_r0/FrameworkNoneOSStartup/startup_ch32v00x.o .pio/build/ch32v003f4p6_evt_r0/FrameworkNoneOSSSystem/system_ch32v00x.o .pio/build/ch32v003f4p6_evt_r0/src/debug.o .pio/build/ch32v003f4p6_evt_r0/src/main.o -L.pio/build/ch32v003f4p6_evt_r0 -Wl,--start-group -lm .pio/build/ch32v003f4p6_evt_r0/libFrameworkNoneOSVariant.a -Wl,--end-group
+
+LDFLAGS+=-Wl,-gc-sections 
+LDFLAGS+=--specs=nano.specs
+LDFLAGS+=--specs=nosys.specs
+LDFLAGS+=-nostartfiles
+LDFLAGS+=-Wl,-Map="build/system_startup.map" 
+LDSTART_GROUP:=-Wl,--start-group 
+LDSTART_END:=-Wl,--end-group
+
+
 WAYS+=$(sort $(dir $(LIBOBJ)))
 
 lib: ways
@@ -88,13 +108,22 @@ lib: $(LIBFILE)
 	@mkdir -p $*
 	touch $@
 
+objs: $(OBJ)
+
 ways: $(addsuffix .way,$(WAYS))
+
+link: ways
+link: $(OBJ) $(LIBFILE)
+	$(CROSSCC) -o $(FIRMWARE) -T $(LINKFILE) $(LDFLAGS) $(OBJ) $(LDSTART_GROUP) -lm $(LIBFILE) $(LDSTART_END)  
 
 $(BUILD)/%.o: $(LIBROOT)/%.c
 	$(CROSSCC) $(CFLAGS) $(RISCVTYPE) $(MODULES) $(addprefix -I,$(INC)) -o $@ -c $<
 
+$(BUILD)/%.o: $(LIBROOT)/%.S
+	$(CROSSCC) $(CFLAGS) $(RISCVTYPE) $(MODULES) $(addprefix -I,$(INC)) -o $@ -c $<
 
-$(BUILD)/%.o: %.c
+
+$(BUILD)/%.o: src/%.c
 	$(CROSSCC) $(CFLAGS) $(RISCVTYPE) $(MODULES) $(addprefix -I,$(INC)) -o $@ -c $<
 
 
@@ -117,7 +146,12 @@ env-ways:
 env-wayss:
 	@echo $(addsuffix .way,$(WAYS))
 
+env-objs:
+	@echo $(OBJ)
+
 clean:
 	@rm -fR $(BUILD)
 
+doit:
+	$(CROSSCC) -o build/firmware.elf -T /home/carsten/work/ch32v003_test/system_startup/.pio/build/ch32v003f4p6_evt_r0/Link.ld -Os -march=rv32ecxw -mabi=ilp32e -ffunction-sections -fdata-sections -Wl,-gc-sections --specs=nano.specs --specs=nosys.specs -nostartfiles -Wl,-Map="/home/carsten/work/ch32v003_test/system_startup/.pio/build/ch32v003f4p6_evt_r0/system_startup.map" .pio/build/ch32v003f4p6_evt_r0/FrameworkNoneOSCore/core_riscv.o .pio/build/ch32v003f4p6_evt_r0/FrameworkNoneOSStartup/startup_ch32v00x.o .pio/build/ch32v003f4p6_evt_r0/FrameworkNoneOSSSystem/system_ch32v00x.o build/debug.o build/main.o -Lbuild -Wl,--start-group -lm $(LIBFILE) -Wl,--end-group
 
