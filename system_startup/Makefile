@@ -114,7 +114,6 @@ objs: $(OBJ) $(LIBOBJ)
 
 ways: $(addsuffix .way,$(WAYS))
 
-test33: $(BUILD)/Core/ch32v00x/core_riscv.o
 
 link: ways
 link: $(OBJ) $(LIBFILE)
