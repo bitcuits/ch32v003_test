@@ -1,0 +1,12 @@
+
+TOOLS?=/home/carsten/.platformio/packages/toolchain-riscv/bin
+WCHTOOLS?=/home/carsten/.platformio/packages/tool-openocd-riscv-wch/bin
+LINKASM?=/home/carsten/work/ch32v003_test/system_startup/.pio.parked/build/ch32v003f4p6_evt_r0/Link.ld 
+
+CROSSCC?=$(TOOLS)/riscv-none-embed-gcc
+CROSSAR?=$(TOOLS)/riscv-none-embed-gcc-ar
+RANLIB?=$(TOOLS)/riscv-none-embed-gcc-ranlib
+OPENOCD?=$(WCHTOOLS)/openocd 
+OPENOCD_SCRIPT:=/home/carsten/.platformio/packages/tool-openocd-riscv-wch/scripts 
+
+
