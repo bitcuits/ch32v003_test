@@ -1,5 +1,5 @@
 
-TOOLS?=/home/carsten/.platformio/packages/toolchain-riscv/bin
+TOOLS?=$(REPOROOT)/toolchain-riscv-linux/bin
 WCHTOOLS?=/home/carsten/.platformio/packages/tool-openocd-riscv-wch/bin
 LINKASM?=/home/carsten/work/ch32v003_test/system_startup/.pio.parked/build/ch32v003f4p6_evt_r0/Link.ld 
 

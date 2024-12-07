@@ -1,3 +1,6 @@
 [submodule "framework-wch-noneos-sdk"]
 	path = framework-wch-noneos-sdk
 	url = https://github.com/Community-PIO-CH32V/framework-wch-noneos-sdk.git
+[submodule "toolchain-riscv-linux"]
+	path = toolchain-riscv-linux
+	url = https://github.com/Community-PIO-CH32V/toolchain-riscv-linux.git
