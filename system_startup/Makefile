@@ -1,7 +1,6 @@
 .SUFFIXES:
 .ONESHELL:
-mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
-export REPOROOT ::= $(dir $(mkfile_path))
+export REPOROOT ::= $(shell git rev-parse --show-toplevel)
 
 include config.tools.mk
 
@@ -102,6 +101,7 @@ env:
 	@echo SRC=$(CFILES)
 	@echo INC=$(INC)
 	@echo WAYS=$(WAYS)
+	@echo LIBROOT=$(LIBROOT)
 
 env-dir:
 	@echo $(dir $(LIBOBJ))

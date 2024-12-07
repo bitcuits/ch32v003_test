@@ -1,4 +1,4 @@
-LIBROOT?=framework-wch-noneos-sdk/
+LIBROOT?=$(abspath $(REPOROOT)/framework-wch-noneos-sdk/)
 
 MODULES+=-DCH32V003F4 
 MODULES+=-DCH32V00X 
@@ -33,8 +33,10 @@ LIBOBJ:=$(addprefix $(BUILD)/,$(LIBOBJ))
 
 LIBFILE:=$(BUILD)/libch32v00x.a
 
-INC+=framework-wch-noneos-sdk/Core/ch32v00x 
-INC+=framework-wch-noneos-sdk/Peripheral/ch32v00x/inc 
-INC+=framework-wch-noneos-sdk/Startup 
-INC+=framework-wch-noneos-sdk/System/ch32v00x
+INC+=$(LIBROOT)/Core/ch32v00x 
+INC+=$(LIBROOT)/Peripheral/ch32v00x/inc 
+INC+=$(LIBROOT)/Startup 
+INC+=$(LIBROOT)/System/ch32v00x
 
+test33:
+	@echo $(LIBROOT)
