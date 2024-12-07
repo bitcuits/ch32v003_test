@@ -29,4 +29,8 @@ LIBOBJ:=$(addprefix $(BUILD)/,$(LIBOBJ))
 
 LIBFILE:=$(BUILD)/libch32v00x.a
 
+INC+=framework-wch-noneos-sdk/Core/ch32v00x 
+INC+=framework-wch-noneos-sdk/Peripheral/ch32v00x/inc 
+INC+=framework-wch-noneos-sdk/Startup 
+INC+=framework-wch-noneos-sdk/System/ch32v00x
 

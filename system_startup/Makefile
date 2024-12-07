@@ -18,12 +18,6 @@ OBJ:=$(notdir $(OBJ))
 OBJ:=$(addprefix $(BUILD)/,$(OBJ)) 
 
 include config.system.mk
-LIBOBJ:=$(LIBSRC:.c=.o)
-LIBOBJ+=$(LIBASM:.S=.o)
-LIBOBJ:=$(addprefix $(BUILD)/,$(LIBOBJ))
-#LIBSRC:=$(addprefix $(LIBROOT)/,$(LIBSRC))
-
-LIBFILE:=$(BUILD)/libch32v00x.a
 
 CFLAGS+=-std=gnu99 
 CFLAGS+=-Os 
@@ -40,10 +34,18 @@ CFLAGS+=-Wunused
 CFLAGS+=-Wuninitialized 
 CFLAGS+=-Wno-comment 
 
-BLDSTARTGROUP+=-Wl,--start-group -lm
-LDENDGROUP+=-Wl,--end-group
+#
+# Link firmware
+#
+LDFLAGS+=-Wl,-gc-sections 
+LDFLAGS+=--specs=nano.specs
+LDFLAGS+=--specs=nosys.specs
+LDFLAGS+=-nostartfiles
+LDFLAGS+=-Wl,-Map="build/system_startup.map" 
+LDSTART_GROUP:=-Wl,--start-group 
+LDSTART_END:=-Wl,--end-group
 
-LDPATH+=$(BUILD)/ch32v003f4p6_evt_r0 
+
 RISCVTYPE=-march=rv32ecxw -mabi=ilp32e 
 
 MODULES+=-DCH32V003F4 
@@ -52,18 +54,6 @@ MODULES+=-DCH32V00x
 MODULES+=-DCH32V003 
 
 INC+=src/include 
-INC+=framework-wch-noneos-sdk/Core/ch32v00x 
-INC+=framework-wch-noneos-sdk/Peripheral/ch32v00x/inc 
-INC+=framework-wch-noneos-sdk/Startup 
-INC+=framework-wch-noneos-sdk/System/ch32v00x
-
-LDFLAGS+=-Wl,-gc-sections 
-LDFLAGS+=--specs=nano.specs
-LDFLAGS+=--specs=nosys.specs
-LDFLAGS+=-nostartfiles
-LDFLAGS+=-Wl,-Map="build/system_startup.map" 
-LDSTART_GROUP:=-Wl,--start-group 
-LDSTART_END:=-Wl,--end-group
 
 
 WAYS+=$(sort $(dir $(LIBOBJ)))
@@ -101,7 +91,7 @@ $(LIBFILE): $(LIBOBJ)
 	$(RANLIB) $@
 
 $(FIRMWARE): lib objs 
-	$(CROSSCC) -o $@ -T $(LINKASM) -Os -march=rv32ecxw -mabi=ilp32e -ffunction-sections -fdata-sections -Wl,-gc-sections --specs=nano.specs --specs=nosys.specs -nostartfiles -Wl,-Map="$(MAPFILE)" $(OBJ) -Lbuild -Wl,--start-group -lm $(LIBFILE) -Wl,--end-group
+	$(CROSSCC) -o $@ -T $(LINKASM) -Os $(RISCVTYPE) -ffunction-sections -fdata-sections -Wl,-gc-sections --specs=nano.specs --specs=nosys.specs -nostartfiles -Wl,-Map="$(MAPFILE)" $(OBJ) -Lbuild $(LDSTART_GROUP) -lm $(LIBFILE) $(LDEND_GROUP) 
 
 openocd: $(FIRMWARE) 
 	$(OPENOCD) -c "debug_level 2" -s $(WCHTOOLS) -s $(OPENOCD_SCRIPT) -f wch-riscv.cfg -c "gdb_port 3333; tcl_port disabled; telnet_port disabled" -c init -c halt -c "program {$<} verify reset" -c shutdown
