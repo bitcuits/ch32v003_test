@@ -104,6 +104,7 @@ WAYS+=$(sort $(dir $(LIBOBJ)))
 
 lib: ways
 lib: $(LIBFILE)
+
 .PHONY: lib
 
 %/.way: 
@@ -118,7 +119,7 @@ ways: $(addsuffix .way,$(WAYS))
 
 link: ways
 link: $(OBJ) $(LIBFILE)
-	$(CROSSCC) -o $(FIRMWARE) -T $(LINKFILE) $(LDFLAGS) $(OBJ) $(LDSTART_GROUP) -lm $(LIBFILE) $(LDSTART_END)  
+	$(CROSSAR) -o $(FIRMWARE) -T $(LINKFILE) $(LDFLAGS) $(OBJ) $(LDSTART_GROUP) -lm $(LIBFILE) $(LDSTART_END)  
 
 $(BUILD)/%.o: $(LIBROOT)/%.c
 	$(CROSSCC) $(CFLAGS) $(RISCVTYPE) $(MODULES) $(addprefix -I,$(INC)) -o $@ -c $<
@@ -130,11 +131,12 @@ $(BUILD)/%.o: src/%.c
 	$(CROSSCC) $(CFLAGS) $(RISCVTYPE) $(MODULES) $(addprefix -I,$(INC)) -o $@ -c $<
 
 $(LIBFILE): $(LIBOBJ)
-	$(CROSSAR) rc $@ $<
+	$(CROSSAR) rc $@ $?
 	$(RANLIB) $@
 
 env:
-	@echo $(LIBOBJ)
+	@echo  LIBOBJ=$(LIBOBJ)
+	@echo OBJ=$(OBJ)
 
 env-src:
 	@echo $(LIBSRC)
@@ -163,7 +165,7 @@ ranlib1: link1
 
 
 
-doit1: ranlib1
+doit1: lib objs 
 	$(CROSSCC) -o build/firmware.elf -T /home/carsten/work/ch32v003_test/system_startup/.pio.parked/build/ch32v003f4p6_evt_r0/Link.ld -Os -march=rv32ecxw -mabi=ilp32e -ffunction-sections -fdata-sections -Wl,-gc-sections --specs=nano.specs --specs=nosys.specs -nostartfiles -Wl,-Map="build/system_startup.map" build/Core/ch32v00x/core_riscv.o build/Startup/startup_ch32v00x.o build/System/ch32v00x/system_ch32v00x.o build/debug.o build/main.o -Lbuild -Wl,--start-group -lm build/libch32v00x.a -Wl,--end-group
 
 
