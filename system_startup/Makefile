@@ -5,6 +5,7 @@ export REPOROOT ::= $(dir $(mkfile_path))
 #export PATHvw vwww/home/carsten/./packages/toolchain-riscv/bin/:$(PATH)
 TOOLS?=/home/carsten/.platformio/packages/toolchain-riscv/bin
 WCHTOOLS?=/home/carsten/.platformio/packages/tool-openocd-riscv-wch/bin
+LINKASM?=/home/carsten/work/ch32v003_test/system_startup/.pio.parked/build/ch32v003f4p6_evt_r0/Link.ld 
 
 CROSSCC?=$(TOOLS)/riscv-none-embed-gcc
 CROSSAR?=$(TOOLS)/riscv-none-embed-gcc-ar
@@ -13,10 +14,8 @@ OPENOCD?=$(WCHTOOLS)/openocd
 BUILD?=build
 
 FIRMWARE:=$(BUILD)/firmware.elf
-LINKFILE:=.pio/build/ch32v003f4p6_evt_r0/Link.ld 
-#FIRMWARE:=/home/carsten/work/ch32v003_test/system_startup/.pio/build/ch32v003f4p6_evt_r0/Link.ld
+MAPFILE:=$(BUILD)/system_startup.map
 
-#riscv-none-embed-gcc -o .pio/build/ch32v003f4p6_evt_r0/FrameworkNoneOSCore/core_riscv.o -c -std=gnu99 -Os -g -Wall -msmall-data-limit=0 -msave-restore -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -fno-common -Wunused -Wuninitialized -Wno-comment -march=rv32ecxw -mabi=ilp32e -DPLATFORMIO=60116 -DCH32V003F4 -DCH32V00X -DCH32V00x -DCH32V003 -Isrc/include -I/home/carsten/.platformio/packages/framework-wch-noneos-sdk/Core/ch32v00x -I/home/carsten/.platformio/packages/framework-wch-noneos-sdk/Peripheral/ch32v00x/inc -I/home/carsten/.platformio/packages/framework-wch-noneos-sdk/Peripheral/ch32v00x/src -I/home/carsten/.platformio/packages/framework-wch-noneos-sdk/Startup -I/home/carsten/.platformio/packages/framework-wch-noneos-sdk/System/ch32v00x /home/carsten/.platformio/packages/framework-wch-noneos-sdk/Core/ch32v00x/core_riscv.c
 CFILES+=src/debug.c
 CFILES+=src/main.c
 INC+=src/include
@@ -136,7 +135,7 @@ $(LIBFILE): $(LIBOBJ)
 	$(RANLIB) $@
 
 $(FIRMWARE): lib objs 
-	$(CROSSCC) -o $@ -T /home/carsten/work/ch32v003_test/system_startup/.pio.parked/build/ch32v003f4p6_evt_r0/Link.ld -Os -march=rv32ecxw -mabi=ilp32e -ffunction-sections -fdata-sections -Wl,-gc-sections --specs=nano.specs --specs=nosys.specs -nostartfiles -Wl,-Map="build/system_startup.map" $(OBJ) -Lbuild -Wl,--start-group -lm build/libch32v00x.a -Wl,--end-group
+	$(CROSSCC) -o $@ -T $(LINKASM) -Os -march=rv32ecxw -mabi=ilp32e -ffunction-sections -fdata-sections -Wl,-gc-sections --specs=nano.specs --specs=nosys.specs -nostartfiles -Wl,-Map="$(MAPFILE)" $(OBJ) -Lbuild -Wl,--start-group -lm $(LIBFILE) -Wl,--end-group
 
 firmware: $(FIRMWARE)
 
@@ -172,5 +171,6 @@ doit1: lib objs
 
 
 openocd: $(FIRMWARE) 
-	$(OPENOCD) -c "debug_level 2" -s /home/carsten/.platformio/packages/tool-openocd-riscv-wch/bin -s /home/carsten/.platformio/packages/tool-openocd-riscv-wch/scripts -f wch-riscv.cfg -c "gdb_port 3333; tcl_port disabled; telnet_port disabled" -c init -c halt -c "program {$<} verify reset" -c shutdown
+	$(OPENOCD) -c "debug_level 2" -s $(WCHTOOLS) -s /home/carsten/.platformio/packages/tool-openocd-riscv-wch/scripts -f wch-riscv.cfg -c "gdb_port 3333; tcl_port disabled; telnet_port disabled" -c init -c halt -c "program {$<} verify reset" -c shutdown
+
 
