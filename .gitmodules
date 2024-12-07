@@ -4,3 +4,6 @@
 [submodule "toolchain-riscv-linux"]
 	path = toolchain-riscv-linux
 	url = https://github.com/Community-PIO-CH32V/toolchain-riscv-linux.git
+[submodule "tool-wlink"]
+	path = tool-wlink
+	url = https://github.com/Community-PIO-CH32V/tool-wlink.git
