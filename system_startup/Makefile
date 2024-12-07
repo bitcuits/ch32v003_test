@@ -4,11 +4,12 @@ mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 export REPOROOT ::= $(dir $(mkfile_path))
 #export PATHvw vwww/home/carsten/./packages/toolchain-riscv/bin/:$(PATH)
 TOOLS?=/home/carsten/.platformio/packages/toolchain-riscv/bin
+WCHTOOLS?=/home/carsten/.platformio/packages/tool-openocd-riscv-wch/bin
 
 CROSSCC?=$(TOOLS)/riscv-none-embed-gcc
 CROSSAR?=$(TOOLS)/riscv-none-embed-gcc-ar
 RANLIB?=$(TOOLS)/riscv-none-embed-gcc-ranlib
-
+OPENOCD?=$(WCHTOOLS)/openocd 
 BUILD?=build
 
 FIRMWARE:=$(BUILD)/firmware.elf
@@ -125,10 +126,8 @@ $(BUILD)/%.o: $(LIBROOT)/%.c
 $(BUILD)/%.o: $(LIBROOT)/%.S
 	$(CROSSCC) $(CFLAGS) $(RISCVTYPE) $(MODULES) $(addprefix -I,$(INC)) -o $@ -c $<
 
-
 $(BUILD)/%.o: src/%.c
 	$(CROSSCC) $(CFLAGS) $(RISCVTYPE) $(MODULES) $(addprefix -I,$(INC)) -o $@ -c $<
-
 
 $(LIBFILE): $(LIBOBJ)
 	$(CROSSAR) rc $@ $<
@@ -155,6 +154,22 @@ env-objs:
 clean:
 	@rm -fR $(BUILD)
 
-doit:
+link1: objs lib
+	$(CROSSAR) rc build/libch32v00x.a build/Peripheral/ch32v00x/src/ch32v00x_adc.o build/Peripheral/ch32v00x/src/ch32v00x_dbgmcu.o build/Peripheral/ch32v00x/src/ch32v00x_dma.o build/Peripheral/ch32v00x/src/ch32v00x_exti.o build/Peripheral/ch32v00x/src/ch32v00x_flash.o build/Peripheral/ch32v00x/src/ch32v00x_gpio.o build/Peripheral/ch32v00x/src/ch32v00x_i2c.o build/Peripheral/ch32v00x/src/ch32v00x_iwdg.o build/Peripheral/ch32v00x/src/ch32v00x_misc.o build/Peripheral/ch32v00x/src/ch32v00x_opa.o build/Peripheral/ch32v00x/src/ch32v00x_pwr.o build/Peripheral/ch32v00x/src/ch32v00x_rcc.o build/Peripheral/ch32v00x/src/ch32v00x_spi.o build/Peripheral/ch32v00x/src/ch32v00x_tim.o build/Peripheral/ch32v00x/src/ch32v00x_usart.o build/Peripheral/ch32v00x/src/ch32v00x_wwdg.o
+
+
+ranlib1: link1
+	$(RANLIB) build/libch32v00x.a
+
+
+
+doit1: ranlib1
+	$(CROSSCC) -o build/firmware.elf -T /home/carsten/work/ch32v003_test/system_startup/.pio.parked/build/ch32v003f4p6_evt_r0/Link.ld -Os -march=rv32ecxw -mabi=ilp32e -ffunction-sections -fdata-sections -Wl,-gc-sections --specs=nano.specs --specs=nosys.specs -nostartfiles -Wl,-Map="build/system_startup.map" build/Core/ch32v00x/core_riscv.o build/Startup/startup_ch32v00x.o build/System/ch32v00x/system_ch32v00x.o build/debug.o build/main.o -Lbuild -Wl,--start-group -lm build/libch32v00x.a -Wl,--end-group
+
+
+doit22:
 	$(CROSSCC) -o build/firmware.elf -T /home/carsten/work/ch32v003_test/system_startup/.pio/build/ch32v003f4p6_evt_r0/Link.ld -Os -march=rv32ecxw -mabi=ilp32e -ffunction-sections -fdata-sections -Wl,-gc-sections --specs=nano.specs --specs=nosys.specs -nostartfiles -Wl,-Map="/home/carsten/work/ch32v003_test/system_startup/.pio/build/ch32v003f4p6_evt_r0/system_startup.map" .pio/build/ch32v003f4p6_evt_r0/FrameworkNoneOSCore/core_riscv.o .pio/build/ch32v003f4p6_evt_r0/FrameworkNoneOSStartup/startup_ch32v00x.o .pio/build/ch32v003f4p6_evt_r0/FrameworkNoneOSSSystem/system_ch32v00x.o build/debug.o build/main.o -Lbuild -Wl,--start-group -lm $(LIBFILE) -Wl,--end-group
+
+openocd: doit1
+	$(OPENOCD) -c "debug_level 2" -s /home/carsten/.platformio/packages/tool-openocd-riscv-wch/bin -s /home/carsten/.platformio/packages/tool-openocd-riscv-wch/scripts -f wch-riscv.cfg -c "gdb_port 3333; tcl_port disabled; telnet_port disabled" -c init -c halt -c "program {build/firmware.elf} verify reset" -c shutdown
 
