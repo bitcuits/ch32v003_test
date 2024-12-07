@@ -41,27 +41,22 @@ LDFLAGS+=-Wl,-gc-sections
 LDFLAGS+=--specs=nano.specs
 LDFLAGS+=--specs=nosys.specs
 LDFLAGS+=-nostartfiles
-LDFLAGS+=-Wl,-Map="build/system_startup.map" 
+LDFLAGS+=-Wl,-Map="$(MAPFILE)" 
+
 LDSTART_GROUP:=-Wl,--start-group 
 LDSTART_END:=-Wl,--end-group
 
 
 RISCVTYPE=-march=rv32ecxw -mabi=ilp32e 
 
-MODULES+=-DCH32V003F4 
-MODULES+=-DCH32V00X 
-MODULES+=-DCH32V00x 
-MODULES+=-DCH32V003 
 
 INC+=src/include 
 
 
 WAYS+=$(sort $(dir $(LIBOBJ)))
 
-lib: ways
-lib: $(LIBFILE)
-
-.PHONY: lib
+all: firmware 
+	
 
 %/.way: 
 	@mkdir -p $*
@@ -71,11 +66,6 @@ objs: ways
 objs: $(OBJ) $(LIBOBJ)
 
 ways: $(addsuffix .way,$(WAYS))
-
-
-link: ways
-link: $(OBJ) $(LIBFILE)
-	$(CROSSAR) -o $(FIRMWARE) -T $(LINKFILE) $(LDFLAGS) $(OBJ) $(LDSTART_GROUP) -lm $(LIBFILE) $(LDSTART_END)  
 
 $(BUILD)/%.o: $(LIBROOT)/%.c
 	$(CROSSCC) $(CFLAGS) $(RISCVTYPE) $(MODULES) $(addprefix -I,$(INC)) -o $@ -c $<
@@ -91,7 +81,12 @@ $(LIBFILE): $(LIBOBJ)
 	$(RANLIB) $@
 
 $(FIRMWARE): lib objs 
-	$(CROSSCC) -o $@ -T $(LINKASM) -Os $(RISCVTYPE) -ffunction-sections -fdata-sections -Wl,-gc-sections --specs=nano.specs --specs=nosys.specs -nostartfiles -Wl,-Map="$(MAPFILE)" $(OBJ) -Lbuild $(LDSTART_GROUP) -lm $(LIBFILE) $(LDEND_GROUP) 
+	$(CROSSCC) -o $@ -T $(LINKASM) -Os $(RISCVTYPE) -ffunction-sections -fdata-sections $(LDFLAGS) $(OBJ) -Lbuild $(LDSTART_GROUP) -lm $(LIBFILE) $(LDEND_GROUP) 
+
+lib: ways
+lib: $(LIBFILE)
+
+.PHONY: lib
 
 openocd: $(FIRMWARE) 
 	$(OPENOCD) -c "debug_level 2" -s $(WCHTOOLS) -s $(OPENOCD_SCRIPT) -f wch-riscv.cfg -c "gdb_port 3333; tcl_port disabled; telnet_port disabled" -c init -c halt -c "program {$<} verify reset" -c shutdown
@@ -102,23 +97,14 @@ firmware: $(FIRMWARE)
 .PHONY: firmware 
 
 env:
-	@echo  LIBOBJ=$(LIBOBJ)
+	@echo LIBOBJ=$(LIBOBJ)
 	@echo OBJ=$(OBJ)
-
-env-src:
-	@echo $(LIBSRC)
+	@echo SRC=$(CFILES)
+	@echo INC=$(INC)
+	@echo WAYS=$(WAYS)
 
 env-dir:
 	@echo $(dir $(LIBOBJ))
-
-env-ways:
-	@echo $(WAYS)
-
-env-wayss:
-	@echo $(addsuffix .way,$(WAYS))
-
-env-objs:
-	@echo $(OBJ)
 
 clean:
 	@rm -fR $(BUILD)

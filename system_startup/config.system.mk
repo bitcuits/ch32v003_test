@@ -1,5 +1,9 @@
 LIBROOT?=framework-wch-noneos-sdk/
-#System/ch32v00x/system_ch32v00x.c
+
+MODULES+=-DCH32V003F4 
+MODULES+=-DCH32V00X 
+MODULES+=-DCH32V00x 
+MODULES+=-DCH32V003 
 
 LIBSRC+=Peripheral/ch32v00x/src/ch32v00x_adc.c
 LIBSRC+=Peripheral/ch32v00x/src/ch32v00x_dbgmcu.c
