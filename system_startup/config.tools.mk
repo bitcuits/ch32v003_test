@@ -9,4 +9,4 @@ RANLIB?=$(TOOLS)/riscv-none-embed-gcc-ranlib
 OPENOCD?=$(WCHTOOLS)/openocd 
 OPENOCD_SCRIPT:=/home/carsten/.platformio/packages/tool-openocd-riscv-wch/scripts 
 
-
+DC?=ldc2
