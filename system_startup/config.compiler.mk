@@ -13,4 +13,11 @@ CFLAGS+=-Wunused
 CFLAGS+=-Wuninitialized 
 CFLAGS+=-Wno-comment 
 
+RISCVTYPELD=-march=rv32ecxw -mabi=ilp32e 
+ifdef LLVM 
+RISCVTYPE=--target=riscv32 -march=rv32e -mabi=ilp32e
+INC+=$(REPOROOT)/toolchain-riscv-linux/riscv-none-embed/include
+else
+RISCVTYPE=$(RISCVTYPELD) 
+endif
 

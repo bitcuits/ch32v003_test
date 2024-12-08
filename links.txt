@@ -1,2 +1,9 @@
 https://ch405-labs.com/ch32v003_intro/
 https://llvm.org/docs/RISCVUsage.html
+
+Baremetal C/C++ on CH32V (including FreeRTOS and TinyUSB)
+
+https://matthewtran.dev/2023/12/baremetal-c-cpp-on-ch32v/
+
+RISC-V RV32E (ilp32e) support
+https://noxim.xyz/blog/rust-ch32v003/introduction/

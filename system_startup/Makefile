@@ -36,7 +36,6 @@ LDSTART_GROUP:=-Wl,--start-group
 LDSTART_END:=-Wl,--end-group
 
 
-RISCVTYPE=-march=rv32ecxw -mabi=ilp32e 
 
 
 INC+=src/include 
@@ -74,7 +73,7 @@ $(LIBFILE): $(LIBOBJ)
 	$(RANLIB) $@
 
 $(FIRMWARE): lib objs 
-	$(CROSSCC) -o $@ -T $(LINKASM) -Os $(RISCVTYPE) -ffunction-sections -fdata-sections $(LDFLAGS) $(OBJ) -Lbuild $(LDSTART_GROUP) -lm $(LIBFILE) $(LDEND_GROUP) 
+	$(CROSSLD) -o $@ -T $(LINKASM) -Os $(RISCVTYPELD) -ffunction-sections -fdata-sections $(LDFLAGS) $(OBJ) -Lbuild $(LDSTART_GROUP) -lm $(LIBFILE) $(LDEND_GROUP) 
 
 lib: ways
 lib: $(LIBFILE)
