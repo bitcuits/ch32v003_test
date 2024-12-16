@@ -10,9 +10,12 @@ FIRMWARE:=$(BUILD)/firmware.elf
 MAPFILE:=$(BUILD)/system_startup.map
 
 CFILES+=src/debug.c
-CFILES+=src/main.c
+#CFILES+=src/main.c
+DFILES+=src/hello.d
 INC+=src/include
 OBJ:=$(CFILES:.c=.o)
+OBJ:=$(DFILES:.d=.o)
+
 OBJ:=$(notdir $(OBJ))
 OBJ:=$(addprefix $(BUILD)/,$(OBJ)) 
 
@@ -22,7 +25,6 @@ include config.compiler.mk
 DFLAGS+=-Os 
 DFLAGS+=-g 
 
-
 #
 # Link firmware
 #
@@ -31,15 +33,9 @@ LDFLAGS+=--specs=nano.specs
 LDFLAGS+=--specs=nosys.specs
 LDFLAGS+=-nostartfiles
 LDFLAGS+=-Wl,-Map="$(MAPFILE)" 
-
+LDFLAGS+=-Wl,--print-memory-usage
 LDSTART_GROUP:=-Wl,--start-group 
 LDSTART_END:=-Wl,--end-group
-
-
-
-
-INC+=src/include 
-
 
 WAYS+=$(sort $(dir $(LIBOBJ)))
 

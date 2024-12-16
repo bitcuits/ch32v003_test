@@ -68,7 +68,7 @@ int main(void) {
 
     // Morse the message indefinitely
     while(1) {
-        printf("Hello World Y\n");
+        printf("Hello World Z\n");
         if(morse(msg, BLINKY_GPIO_PORT, BLINKY_GPIO_PIN, BLINK_LENGTH_MS) 
             != OK) {
             printf("An error occurred: Invalid message.\n");

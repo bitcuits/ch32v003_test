@@ -1,6 +1,17 @@
 module hello;
 @nogc nothrow:
 extern(C): __gshared:
+// Definitions to allow easy adjustment
+enum BLINKY_GPIO_PORT = GPIOC;
+enum BLINKY_GPIO_PIN = GPIO_Pin_1;
+enum BLINKY_ON = 0;
+enum BLINKY_OFF = 1;
+enum BLINK_LENGTH_MS = 100;
+
+// Error codes
+enum OK = 0;
+enum ERR_OUT_OF_RANGE = 1;
+
 /**
  * @file    main.c
  * @author  Florian Schütz (fschuetz@ieee.org)
@@ -59,7 +70,7 @@ int main() {
     // setting the pin, mode (output) and the speed (50MHz). We then call
     // GPIO_Init with the port defined in the header and the init structure
     // as arguments.
-    GPIO_InitTypeDef GPIO_InitStructure = {0};
+    GPIO_InitTypeDef GPIO_InitStructure = 0;
     GPIO_InitStructure.GPIO_Pin = BLINKY_GPIO_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
