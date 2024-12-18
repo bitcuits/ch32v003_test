@@ -7,3 +7,6 @@ https://matthewtran.dev/2023/12/baremetal-c-cpp-on-ch32v/
 
 RISC-V RV32E (ilp32e) support
 https://noxim.xyz/blog/rust-ch32v003/introduction/
+
+ch32v003 LCD and touch
+https://www.youtube.com/watch?v=KNDRUWlsu0k
